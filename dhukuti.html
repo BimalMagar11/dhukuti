@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dhukuti Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 20px 24px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.9);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      margin-bottom: 16px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .welcome {
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    /* Login box */
+    #loginBox {
+      max-width: 360px;
+      margin: 0 auto;
+      background: #020617;
+      padding: 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.85);
+    }
+
+    #loginBox h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: #38bdf8;
+      color: #0b1120;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    .error {
+      color: #f97373;
+      font-size: 13px;
+      margin-top: 6px;
+      min-height: 16px;
+    }
+
+    #app {
+      display: none;
+    }
+
+    .rotation-card {
+      margin-top: 8px;
+      background: #020617;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .rotation-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .rotation-date {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .rotation-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .payout-amount {
+      font-weight: 600;
+      color: #22c55e;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- LOGIN -->
+    <div id="loginBox">
+      <h2>Dhukuti Login</h2>
+      <div class="input-group">
+        <label>Username</label>
+        <input id="loginUser" type="text" />
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input id="loginPass" type="password" />
+      </div>
+      <button class="btn btn-primary" onclick="login()">Login</button>
+      <div id="loginError" class="error"></div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="card">
+      <h1>Dhukuti Tracker</h1>
+      <div class="subtitle">Fixed system — no increment</div>
+      <div class="welcome" id="welcomeUser"></div>
+
+      <div class="rotation-card">
+        <div class="rotation-header">
+          <div id="rotationTitle">Rotation 1</div>
+          <div id="turnInfo">Turn 1 of 4</div>
+        </div>
+
+        <div class="rotation-date" id="rotationDate"></div>
+
+        <div class="rotation-line">
+          <span>This month goes to:</span>
+          <span id="rotationPerson"></span>
+        </div>
+
+        <div class="rotation-line">
+          <span>Total payout:</span>
+          <span class="payout-amount" id="totalPayout">Rs 400,000</span>
+        </div>
+
+        <div class="rotation-line">
+          <span>Next pot contribution:</span>
+          <span id="nextContribution">Rs 100,000</span>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="btn btn-ghost" onclick="prevTurn()">Previous</button>
+          <button class="btn btn-ghost" onclick="resetToCurrent()">Reset</button>
+          <button class="btn btn-ghost" onclick="nextTurn()">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const users = {
+      "PuranSristi": "PS2025",
+      "BimalNiru": "BN2025",
+      "BhuwanTara": "BT2025",
+      "RajeshMonika": "RM2025"
+    };
+
+    const members = ["PuranSristi", "BimalNiru", "BhuwanTara", "RajeshMonika"];
+    const membersCount = members.length;
+
+    const TOTAL_PAYOUT = 400000;
+    const NEXT_CONTRIBUTION = 100000;
+
+    const startYear = 2025;
+    const startMonthIndex = 11; // December
+
+    const engMonths = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+
+    const nepMonths = [
+      "Poush","Magh","Falgun","Chaitra","Baisakh","Jestha",
+      "Ashadh","Shrawan","Bhadra","Ashwin","Kartik","Mangsir"
+    ];
+
+    let globalTurn = 0;
+
+    function calculateMonthsFromStart() {
+      const today = new Date();
+      const start = new Date(startYear, startMonthIndex, 1);
+
+      let months =
+        (today.getFullYear() - start.getFullYear()) * 12 +
+        (today.getMonth() - start.getMonth());
+
+      return Math.max(0, months);
+    }
+
+    function login() {
+      const u = document.getElementById("loginUser").value.trim();
+      const p = document.getElementById("loginPass").value.trim();
+      const error = document.getElementById("loginError");
+
+      if (users[u] && users[u] === p) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        document.getElementById("welcomeUser").textContent = "Welcome, " + u;
+
+        globalTurn = calculateMonthsFromStart();
+        updateView();
+      } else {
+        error.textContent = "Invalid username or password.";
+      }
+    }
+
+    function updateView() {
+      const rotationNumber = Math.floor(globalTurn / membersCount) + 1;
+      const turnInRotation = (globalTurn % membersCount) + 1;
+
+      const memberIndex = globalTurn % membersCount;
+      const person = members[memberIndex];
+
+      const absMonth = startMonthIndex + globalTurn;
+      const year = startYear + Math.floor(absMonth / 12);
+      const monthIndex = absMonth % 12;
+
+      document.getElementById("rotationTitle").textContent =
+        "Rotation " + rotationNumber;
+
+      document.getElementById("turnInfo").textContent =
+        "Turn " + turnInRotation + " of " + membersCount;
+
+      document.getElementById("rotationDate").textContent =
+        engMonths[monthIndex] + " " + year + " (" + nepMonths[monthIndex] + ")";
+
+      document.getElementById("rotationPerson").textContent = person;
+
+      document.getElementById("totalPayout").textContent =
+        "Rs " + TOTAL_PAYOUT.toLocaleString();
+
+      document.getElementById("nextContribution").textContent =
+        "Rs " + NEXT_CONTRIBUTION.toLocaleString();
+    }
+
+    function nextTurn() {
+      globalTurn++;
+      updateView();
+    }
+
+    function prevTurn() {
+      if (globalTurn > 0) {
+        globalTurn--;
+        updateView();
+      }
+    }
+
+    function resetToCurrent() {
+      globalTurn = calculateMonthsFromStart();
+      updateView();
+    }
+  </script>
+</body>
+</html>
